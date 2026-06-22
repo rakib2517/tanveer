@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Income EMRAN HOSSAIN</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Ad SDK -->
+    <script src='//libtl.com/sdk.js' data-zone='11185433' data-sdk='show_11185433'></script>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f3f4f6; padding-bottom: 100px; }
+        .header { background: #fff; padding: 18px; font-size: 22px; font-weight: bold; box-shadow: 0 2px 10px rgba(0,0,0,.05); position: sticky; top: 0; z-index: 100; text-align: center; color: #2563eb; }
+        .container { padding: 15px; }
+        .card { background: #fff; padding: 15px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+        .balance { font-size: 38px; font-weight: bold; margin-top: 5px; color: #11149899; }
+        .status { margin-top: 10px; font-weight: bold; color: #ff9800; font-size: 14px; }
+        .task { display: flex; justify-content: space-between; align-items: center; background: #fafafa; padding: 15px; border-radius: 15px; margin-top: 10px; border: 1px solid #eee; }
+        .task small { color: gray; }
+        button { border: none; padding: 12px 18px; border-radius: 12px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:active { transform: scale(0.95); }
+        .orange { background: #ff9800; color: white; }
+        .blue { background: #2563eb; color: white; }
+        .green { background: #22c55e; color: white; }
+        .red { background: #ef4444; color: white; width: 100%; margin-top: 10px; }
+        .page { display: none; }
+        .active { display: block; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; display: flex; justify-content: space-around; padding: 12px 0; box-shadow: 0 -2px 10px rgba(0,0,0,.1); z-index: 1000; }
+        .nav-btn { text-align: center; font-size: 11px; font-weight: bold; color: #666; cursor: pointer; }
+        .nav-btn i { display: block; font-size: 22px; margin-bottom: 5px; }
+        .nav-btn.active-nav { color: #2563eb; }
+        input, select { width: 100%; padding: 14px; border-radius: 12px; border: 1px solid #ddd; margin-top: 10px; font-size: 15px; outline: none; }
+        .profile { text-align: center; }
+        .profile img { width: 100px; height: 100px; border-radius: 50%; border: 4px solid #2563eb; margin-bottom: 10px; }
+        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #111827; color: white; padding: 12px 20px; border-radius: 12px; display: none; z-index: 9999; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+<div class="header">মানি ইনকাম</div>
+
+<div class="container">
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <div class="card">
+            <div style="font-size:14px; color:gray;">বর্তমান ব্যালেন্স</div>
+            <div class="balance"><span id="balance">0.00</span> ৳</div>
+            <div class="status" id="status">এড লোড করার জন্য ক্লেইম করুন</div>
+        </div>
+
+        <div class="card">
+            <h3>ডেইলি টাস্ক</h3>
+            <div class="task">
+                <div><b>শর্ট এড দেখুন</b><br><small>পুরস্কার: ০.১৫ ৳</small></div>
+                <button class="orange" onclick="handleAd('reward')">ক্লেইম</button>
+            </div>
+            <div class="task">
+                <div><b>পপআপ এড</b><br><small>পুরস্কার: ০.১৫ ৳</small></div>
+                <button class="orange" onclick="handleAd('pop')">ক্লেইম</button>
+            </div>
+            <div class="task">
+                <div><b>ভিডিও এড</b><br><small>অটোমেটিক এডস</small></div>
+                <button class="blue" onclick="startAds()">স্টার্ট</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Wallet Page -->
+    <div id="wallet" class="page">
+        <div class="card">
+            <h2>উইথড্র</h2>
+            <p style="margin-top:10px;">ব্যালেন্স: <b><span id="walletBalance">0.00</span> ৳</b></p>
+            <input type="number" id="withdrawAmount" placeholder="টাকার পরিমাণ (মিনিমাম ৫০)">
+            <select id="method">
+                <option value="বিকাশ">বিকাশ</option>
+                <option value="নগদ">নগদ</option>
+            </select>
+            <input type="number" id="number" placeholder="পার্সোনাল নাম্বার">
+            <button class="red" onclick="withdrawNow()">উইথড্র রিকুয়েস্ট</button>
+            <button class="blue" style="width:100%;margin-top:10px;" onclick="toggleHistory()">হিস্টরি দেখুন</button>
+        </div>
+        <div class="card" id="historyCard" style="display:none;">
+            <h3>উইথড্র হিস্টরি</h3>
+            <div id="withdrawHistory" style="margin-top:10px;"></div>
+        </div>
+    </div>
+
+    <!-- Referral Page -->
+    <div id="refer" class="page">
+        <div class="card" style="text-align:center;">
+            <h2>রেফার করে ইনকাম</h2>
+            <p style="margin:10px 0;">আপনার বন্ধুদের আমন্ত্রণ জানান</p>
+            <div style="background:#f0f4ff; padding:20px; border-radius:15px;">
+                <h1 id="refCode" style="letter-spacing:2px; color:#2563eb;"></h1>
+                <button class="green" style="width:100%;margin-top:15px;" onclick="shareReferral()">লিংক কপি করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ranking & Rules (Rest of your HTML) -->
+    <div id="ranking" class="page">
+        <div class="card"><h2>টপ ইউজার র‍্যাঙ্ক</h2><div id="rankingBox"></div></div>
+    </div>
+
+    <div id="rules" class="page">
+        <div class="card">
+            <h2>📜 নিয়মাবলী</h2>
+            <p style="margin-top:15px; line-height:1.6;">১. প্রতিদিন আনলিমিটেড এড দেখতে পারবেন।<br>২. মিনিমাম উইথড্র ৫০ টাকা।<br>৩. ভুল নাম্বার দিলে পেমেন্ট পাবেন না।<br>৪. ভিপিএন ব্যবহার করবেন না (যদি না প্রয়োজন হয়)।</p>
+        </div>
+    </div>
+
+    <div id="profile" class="page">
+        <div class="card profile">
+            <img id="profilePic" src="https://i.ibb.co/0jqHpnp/user.png">
+            <h2 id="name">User</h2>
+            <p id="userId">ID: 00000</p>
+            <button class="red" onclick="logoutUser()">ডেটা রিসেট করুন</button>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-btn active-nav" onclick="showPage('home', this)"><i class="fa-solid fa-house"></i>হোম</div>
+    <div class="nav-btn" onclick="showPage('wallet', this)"><i class="fa-solid fa-wallet"></i>ওয়ালেট</div>
+    <div class="nav-btn" onclick="showPage('refer', this)"><i class="fa-solid fa-user-group"></i>রেফার</div>
+    <div class="nav-btn" onclick="showPage('ranking', this)"><i class="fa-solid fa-trophy"></i>র‍্যাঙ্ক</div>
+    <div class="nav-btn" onclick="showPage('rules', this)"><i class="fa-solid fa-file-lines"></i>নিয়ম</div>
+    <div class="nav-btn" onclick="showPage('profile', this)"><i class="fa-solid fa-user"></i>প্রোফাইল</div>
+</div>
+
+<script>
+let tg = window.Telegram.WebApp;
+tg.expand();
+
+// Initialize Profile
+let user = tg.initDataUnsafe.user || { id: "Guest", first_name: "ইউজার" };
+document.getElementById("name").innerText = user.first_name;
+document.getElementById("userId").innerText = "ID: " + user.id;
+if(user.photo_url) document.getElementById("profilePic").src = user.photo_url;
+
+// App Logic
+let balance = parseFloat(localStorage.getItem("balance") || 0);
+updateBalanceDisplay();
+
+function toast(msg) {
+    let t = document.getElementById("toast");
+    t.innerText = msg;
+    t.style.display = "block";
+    setTimeout(() => t.style.display = "none", 2500);
+}
+
+function showPage(pageId, btn) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(pageId).classList.add("active");
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active-nav"));
+    if(btn) btn.classList.add("active-nav");
+}
+
+function updateBalanceDisplay() {
+    document.getElementById("balance").innerText = balance.toFixed(2);
+    document.getElementById("walletBalance").innerText = balance.toFixed(2);
+    localStorage.setItem("balance", balance);
+}
+
+// Ads Handling
+async function handleAd(type) {
+    document.getElementById("status").innerText = "এড লোড হচ্ছে, অপেক্ষা করুন...";
+    
+    if (typeof show_11185433 === "function") {
+        try {
+            await show_11185433(type === 'pop' ? 'pop' : '');
+            balance += 0.15;
+            updateBalanceDisplay();
+            toast("অভিনন্দন! ০.১৫৳ যোগ হয়েছে।");
+            document.getElementById("status").innerText = "টাস্ক সম্পন্ন হয়েছে";
+        } catch (e) {
+            toast("এড লোড করতে ব্যর্থ। আবার চেষ্টা করুন।");
+            document.getElementById("status").innerText = "সার্ভার বিজি";
+        }
+    } else {
+        toast("Ad SDK লোড হচ্ছে... ৫ সেকেন্ড পর চেষ্টা করুন");
+    }
+}
+
+function startAds() {
+    if (typeof show_11128671 === "function") {
+        show_11128671({ type: 'inApp', inAppSettings: { frequency: 2, interval: 30 } });
+        toast("অটো ভিডিও এড চালু হয়েছে");
+    } else {
+        toast("SDK লোড হয়নি");
+    }
+}
+
+// Withdraw Logic
+function withdrawNow() {
+    let amount = parseFloat(document.getElementById("withdrawAmount").value);
+    let method = document.getElementById("method").value;
+    let number = document.getElementById("number").value;
+
+    if (isNaN(amount) || amount < 50) {
+        toast("মিনিমাম ৫০ টাকা থাকতে হবে");
+        return;
+    }
+    if (amount > balance) {
+        toast("আপনার ব্যালেন্স কম");
+        return;
+    }
+    if (number.length < 11) {
+        toast("সঠিক ১১ ডিজিটের নাম্বার দিন");
+        return;
+    }
+
+    // Process Withdraw
+    balance -= amount;
+    updateBalanceDisplay();
+
+    let history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
+    history.unshift({ amount, method, number, status: "Pending", date: new Date().toLocaleDateString() });
+    localStorage.setItem("withdrawHistory", JSON.stringify(history));
+
+    toast("রিকুয়েস্ট সফল! ২৪ ঘণ্টার মধ্যে পেমেন্ট পাবেন।");
+    loadWithdrawHistory();
+}
+
+function toggleHistory() {
+    let box = document.getElementById("historyCard");
+    box.style.display = box.style.display === "none" ? "block" : "none";
+    if(box.style.display === "block") loadWithdrawHistory();
+}
+
+function loadWithdrawHistory() {
+    let history = JSON.parse(localStorage.getItem("withdrawHistory") || "[]");
+    let container = document.getElementById("withdrawHistory");
+    if(history.length === 0) {
+        container.innerHTML = "<p style='text-align:center; color:gray;'>কোনো রেকর্ড নেই</p>";
+        return;
+    }
+    container.innerHTML = history.map(item => `
+        <div class="task">
+            <div><b>${item.amount}৳ (${item.method})</b><br><small>${item.date}</small></div>
+            <span style="color:${item.status==='Pending'?'#ff9800':'#22c55e'}; font-weight:bold;">${item.status}</span>
+        </div>
+    `).join('');
+}
+
+// Referral
+let ref = localStorage.getItem("refCode") || Math.random().toString(36).substring(2, 8).toUpperCase();
+localStorage.setItem("refCode", ref);
+document.getElementById("refCode").innerText = ref;
+
+function shareReferral() {
+    let link = "https://t.me/YOUR_BOT_USERNAME?start=" + ref; 
+    navigator.clipboard.writeText(link);
+    toast("লিংক কপি হয়েছে! বন্ধুদের পাঠান।");
+}
+
+function logoutUser() {
+    if(confirm("আপনি কি সব ডেটা মুছে ফেলতে চান?")) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+// Initial Ranking Load
+function loadRanking() {
+    const names = ["Rahim", "Karim", "Emran", "Jahid", "Siam", "Monir", "Tanvir", "Sajib"];
+    let html = names.map((name, i) => `
+        <div class="task">
+            <div><b>#${i+1} ${name}</b><br><small>${(Math.random()*500 + 100).toFixed(2)}৳</small></div>
+            <i class="fa-solid fa-trophy" style="color:#ff9800;"></i>
+        </div>
+    `).join('');
+    document.getElementById("rankingBox").innerHTML = html;
+}
+loadRanking();
+</script>
+</body>
+</html>
